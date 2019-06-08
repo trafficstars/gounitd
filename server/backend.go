@@ -11,7 +11,7 @@ import (
 
 type Backend struct {
 	Server                *Server
-	Socket                *fasthttpsocket.Socket
+	Socket                *fasthttpsocket.SocketClient
 	Address               string
 	URLRegexp             *regexp.Regexp
 	Connections           int
@@ -33,12 +33,16 @@ func newBackend(srv *Server, cfg ConfigBackend) (*Backend, error) {
 }
 
 func (b *Backend) Start() error {
-	b.Socket = fasthttpsocket.NewSocket(nil, fasthttpsocket.Config{
+	var err error
+	b.Socket, err = fasthttpsocket.NewSocketClient(fasthttpsocket.Config{
 		Address:               b.Address,
 		UnixSocketPermissions: b.UnixSocketPermissions,
 		Logger:                log.New(`[gounit-backend]`),
 	})
-	err := b.Socket.StartClient(b.Connections)
+	if err != nil {
+		return err
+	}
+	err = b.Socket.Start(b.Connections)
 	if err != nil {
 		b.Socket = nil
 	}
