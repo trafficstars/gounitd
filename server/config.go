@@ -22,7 +22,7 @@ type ConfigFrontend struct {
 
 type ConfigBackend struct {
 	Address     string
-	URLRegexp   string
+	URLRegexp   string `yaml:"url_regexp"`
 	Connections int
 }
 
