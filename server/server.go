@@ -117,6 +117,7 @@ func (srv *Server) metricsConsider(startTime time.Time, f *Frontend, b *Backend,
 	tags := metrics.NewFastTags().
 		Set(`frontend`, f.ListenFamily+":"+f.ListenAddress).
 		Set(`backend`, backendAddress).
+		Set(`host`, string(ctx.Request.Host())).
 		Set(`code`, ctx.Response.StatusCode())
 	metrics.Count(`requests`, tags).Increment()
 	metrics.TimingBuffered(`request_latency`, tags).ConsiderValue(time.Since(startTime))
