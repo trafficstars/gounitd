@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	enableLogging := flag.Bool("enable-logging", false, `should we print about everything?`)
+	debug := flag.Bool("debug", false, `should we print about everything?`)
 	configPath := flag.String("config", "/etc/gounit.yaml", `path to the config file [default: "/etc/gounit.yaml"]`)
 	flag.Parse()
 
@@ -24,17 +24,17 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if *enableLogging {
+	if *debug {
 		fmt.Println("config:", *cfg)
 	}
 	srv, err := server.NewServer(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
-	if *enableLogging {
-		srv.AccessLogger = newLogger(`access`)
-		srv.ErrorLogger = newLogger(`error`)
+	if *debug {
+		srv.AccessLogger = newLoggerStdout(`access`)
 	}
+	srv.ErrorLogger = newLoggerSyslog(`error`)
 	err = srv.Start()
 	if err != nil {
 		log.Fatal(err)

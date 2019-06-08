@@ -2,6 +2,7 @@ package server
 
 import (
 	"errors"
+	"github.com/trafficstars/metrics"
 	"sync"
 	"time"
 
@@ -108,14 +109,31 @@ func (srv *Server) Wait() error {
 	return nil
 }
 
-func (srv *Server) HandleRequest(ctx *fasthttp.RequestCtx) {
+func (srv *Server) metricsConsider(startTime time.Time, f *Frontend, b *Backend, ctx *fasthttp.RequestCtx) {
+	var backendAddress string
+	if b != nil {
+		backendAddress = b.Address
+	}
+	tags := metrics.NewFastTags().
+		Set(`frontend`, f.ListenFamily+":"+f.ListenAddress).
+		Set(`backend`, backendAddress).
+		Set(`code`, ctx.Response.StatusCode())
+	metrics.Count(`requests`, tags).Increment()
+	metrics.TimingBuffered(`request_latency`, tags).ConsiderValue(time.Since(startTime))
+	tags.Release()
+}
+
+func (srv *Server) HandleRequest(f *Frontend, ctx *fasthttp.RequestCtx) {
+	startTime := time.Now()
 	for _, backend := range srv.Backends {
 		if backend.IsFits(ctx) {
-			backend.HandleRequest(ctx)
+			backend.HandleRequest(f, ctx)
+			srv.metricsConsider(startTime, f, backend, ctx)
 			return
 		}
 	}
 	srv.send404(ctx)
+	srv.metricsConsider(startTime, f, nil, ctx)
 }
 
 func (srv *Server) send404(ctx *fasthttp.RequestCtx) {

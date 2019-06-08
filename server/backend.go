@@ -52,7 +52,7 @@ func (b *Backend) IsFits(ctx *fasthttp.RequestCtx) bool {
 	return b.URLRegexp.Match(ctx.Request.URI().FullURI())
 }
 
-func (b *Backend) HandleRequest(ctx *fasthttp.RequestCtx) error {
+func (b *Backend) HandleRequest(f *Frontend, ctx *fasthttp.RequestCtx) error {
 	if b.Server.AccessLogger != nil {
 		b.Server.AccessLogger.Printf("request to %v: %v", b.Address, string(ctx.URI().FullURI()))
 	}

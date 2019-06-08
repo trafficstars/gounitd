@@ -20,6 +20,7 @@ type Frontend struct {
 	ListenAddress string
 	HTTP          *fasthttp.Server
 	Concurrency   int
+	IsControl     bool
 }
 
 func newFrontend(srv *Server, cfg ConfigFrontend) (*Frontend, error) {
@@ -35,12 +36,17 @@ func newFrontend(srv *Server, cfg ConfigFrontend) (*Frontend, error) {
 		ListenFamily:  words[0],
 		ListenAddress: words[1],
 		Concurrency:   cfg.Concurrency,
+		IsControl:     cfg.IsControl,
 	}
 	return f, nil
 }
 
 func (f *Frontend) handleRequest(ctx *fasthttp.RequestCtx) {
-	f.Server.HandleRequest(ctx)
+	if f.IsControl {
+		writeMetrics(ctx)
+		return
+	}
+	f.Server.HandleRequest(f, ctx)
 }
 
 func (f *Frontend) Start() error {

@@ -17,6 +17,7 @@ type Logger interface {
 type ConfigFrontend struct {
 	Listen      string
 	Concurrency int
+	IsControl   bool `yaml:"is_control"`
 	//Rules []ConfigRule
 }
 
