@@ -16,13 +16,17 @@ type Backend struct {
 	URLRegexp             *regexp.Regexp
 	Connections           int
 	UnixSocketPermissions os.FileMode
+	Return                uint
+	SetHeadersMap         map[string]string
 }
 
 func newBackend(srv *Server, cfg ConfigBackend) (*Backend, error) {
 	b := &Backend{
-		Server:      srv,
-		Address:     cfg.Address,
-		Connections: cfg.Connections,
+		Server:        srv,
+		Address:       cfg.Address,
+		Connections:   cfg.Connections,
+		Return:        cfg.Return,
+		SetHeadersMap: cfg.SetHeaders.ToMap(),
 	}
 	var err error
 	b.URLRegexp, err = regexp.Compile(cfg.URLRegexp)
@@ -33,6 +37,9 @@ func newBackend(srv *Server, cfg ConfigBackend) (*Backend, error) {
 }
 
 func (b *Backend) Start() error {
+	if b.Return > 0 {
+		return nil
+	}
 	var err error
 	b.Socket, err = fasthttpsocket.NewSocketClient(fasthttpsocket.Config{
 		Address:               b.Address,
@@ -60,11 +67,19 @@ func (b *Backend) HandleRequest(f *Frontend, ctx *fasthttp.RequestCtx) error {
 	if b.Server.AccessLogger != nil {
 		b.Server.AccessLogger.Printf("request to %v: %v", b.Address, string(ctx.URI().FullURI()))
 	}
-	err := b.Socket.SendAndReceive(ctx)
-	if err != nil {
-		ctx.SetStatusCode(http.StatusBadGateway)
-		if b.Server.ErrorLogger != nil {
-			b.Server.ErrorLogger.Printf("cannot send request to %v: %v", b.Address, err)
+	var err error
+	if b.Return > 0 {
+		ctx.Response.SetStatusCode(int(b.Return))
+	} else {
+		if b.SetHeadersMap != nil {
+			b.Server.SetHeaders(ctx, f.SetHeadersMap)
+		}
+		err = b.Socket.SendAndReceive(ctx)
+		if err != nil {
+			ctx.SetStatusCode(http.StatusBadGateway)
+			if b.Server.ErrorLogger != nil {
+				b.Server.ErrorLogger.Printf("cannot send request to %v: %v", b.Address, err)
+			}
 		}
 	}
 	if b.Server.AccessLogger != nil {

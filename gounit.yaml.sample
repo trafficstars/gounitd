@@ -1,6 +1,9 @@
 frontends:
  - listen: 'tcp:0.0.0.0:8085'
    concurrency: 600
+   set_headers:
+    - name: 'X-Real-Ip'
+      value: '${HEADER:X-Forwarded-For}'
  - listen: 'tcp:0.0.0.0:8086'
    concurrency: 2
    is_control: true
@@ -11,3 +14,5 @@ backends:
  - address: 'go/net/http:gob:unix:/run/pixel.sock'
    connections: 100
    url_regexp: '^https?://pixel\.(localhost|tsyndicate.com|run(ative)?-syndicate.com)(:[0-9]*)?/'
+ - url_regexp: '^https?://health-check/'
+   return: 200

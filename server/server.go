@@ -3,6 +3,7 @@ package server
 import (
 	"errors"
 	"github.com/trafficstars/metrics"
+	"strings"
 	"sync"
 	"time"
 
@@ -139,4 +140,14 @@ func (srv *Server) HandleRequest(f *Frontend, ctx *fasthttp.RequestCtx) {
 
 func (srv *Server) send404(ctx *fasthttp.RequestCtx) {
 	ctx.Response.SetStatusCode(404)
+}
+
+func (srv *Server) SetHeaders(ctx *fasthttp.RequestCtx, headersMap map[string]string) {
+	for headerName, headerValue := range headersMap {
+		if strings.HasPrefix(headerValue, `${HEADER:`) && strings.HasSuffix(headerValue, `}`) {
+			referredHeaderName := headerValue[len(`${HEADER:`) : len(headerValue)-1]
+			headerValue = string(ctx.Request.Header.Peek(referredHeaderName))
+		}
+		ctx.Request.Header.Set(headerName, headerValue)
+	}
 }

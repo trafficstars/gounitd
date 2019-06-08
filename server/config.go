@@ -14,17 +14,35 @@ type Logger interface {
 	Printf(string, ...interface{})
 }
 
+type ConfigSetHeader struct {
+	Name  string
+	Value string
+}
+
+type ConfigSetHeaders []ConfigSetHeader
+
+func (cfg ConfigSetHeaders) ToMap() map[string]string {
+	r := map[string]string{}
+	for _, h := range cfg {
+		r[h.Name] = h.Value
+	}
+	return r
+}
+
 type ConfigFrontend struct {
 	Listen      string
 	Concurrency int
 	IsControl   bool `yaml:"is_control"`
 	//Rules []ConfigRule
+	SetHeaders ConfigSetHeaders `yaml:"set_headers"`
 }
 
 type ConfigBackend struct {
 	Address     string
 	URLRegexp   string `yaml:"url_regexp"`
 	Connections int
+	Return      uint
+	SetHeaders  ConfigSetHeaders `yaml:"set_headers"`
 }
 
 type Config struct {

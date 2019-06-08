@@ -21,6 +21,7 @@ type Frontend struct {
 	HTTP          *fasthttp.Server
 	Concurrency   int
 	IsControl     bool
+	SetHeadersMap map[string]string
 }
 
 func newFrontend(srv *Server, cfg ConfigFrontend) (*Frontend, error) {
@@ -37,6 +38,7 @@ func newFrontend(srv *Server, cfg ConfigFrontend) (*Frontend, error) {
 		ListenAddress: words[1],
 		Concurrency:   cfg.Concurrency,
 		IsControl:     cfg.IsControl,
+		SetHeadersMap: cfg.SetHeaders.ToMap(),
 	}
 	return f, nil
 }
@@ -45,6 +47,9 @@ func (f *Frontend) handleRequest(ctx *fasthttp.RequestCtx) {
 	if f.IsControl {
 		writeMetrics(ctx)
 		return
+	}
+	if f.SetHeadersMap != nil {
+		f.Server.SetHeaders(ctx, f.SetHeadersMap)
 	}
 	f.Server.HandleRequest(f, ctx)
 }
