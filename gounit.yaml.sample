@@ -8,10 +8,10 @@ frontends:
    concurrency: 2
    is_control: true
 backends:
- - address: 'go/net/http:gob:unix:/run/rotator.sock'
+ - address: 'raw:native:unix:/run/rotator.sock'
    connections: 500
    url_regexp: '^https?://rotator\.(localhost|tsyndicate.com|run(ative)?-syndicate.com)(:[0-9]*)?/'
- - address: 'go/net/http:gob:unix:/run/pixel.sock'
+ - address: 'raw:native:unix:/run/pixel.sock'
    connections: 100
    url_regexp: '^https?://pixel\.(localhost|tsyndicate.com|run(ative)?-syndicate.com)(:[0-9]*)?/'
  - url_regexp: '^https?://health-check/'
