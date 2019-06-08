@@ -134,6 +134,7 @@ func (srv *Server) HandleRequest(f *Frontend, ctx *fasthttp.RequestCtx) {
 			return
 		}
 	}
+	srv.ErrorLogger.Printf("not found a backend for", string(ctx.URI().FullURI()))
 	srv.send404(ctx)
 	srv.metricsConsider(startTime, f, nil, ctx)
 }
