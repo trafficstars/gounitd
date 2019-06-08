@@ -1,0 +1,10 @@
+frontends:
+ - listen: "tcp:0.0.0.0:8085"
+   concurrency: 600
+backends:
+ - address: "go/net/http:gob:unix:/run/rotator.sock"
+   url_regexp: "^https?://rotator/"
+   connections: 500
+ - address: "go/net/http:gob:unix:/run/pixel.sock"
+   url_regexp: "^https?://pixel/"
+   connections: 100
