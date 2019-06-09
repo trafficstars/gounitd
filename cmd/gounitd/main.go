@@ -7,12 +7,15 @@ import (
 	"os"
 
 	"github.com/trafficstars/gounit/server"
+	"github.com/trafficstars/metrics"
 )
 
 func main() {
 	debug := flag.Bool("debug", false, `should we print about everything?`)
 	configPath := flag.String("config", "/etc/gounit.yaml", `path to the config file [default: "/etc/gounit.yaml"]`)
 	flag.Parse()
+
+	metrics.SetDefaultGCEnabled(false)
 
 	configFile, err := os.Open(*configPath)
 	if err != nil {
