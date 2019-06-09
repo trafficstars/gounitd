@@ -16,6 +16,7 @@ func main() {
 	flag.Parse()
 
 	metrics.SetDefaultGCEnabled(false)
+	metrics.SetDisableFastTags(true)
 
 	configFile, err := os.Open(*configPath)
 	if err != nil {
