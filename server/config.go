@@ -34,7 +34,11 @@ type ConfigFrontend struct {
 	Concurrency int
 	IsControl   bool `yaml:"is_control"`
 	//Rules []ConfigRule
-	SetHeaders ConfigSetHeaders `yaml:"set_headers"`
+	ReadBufferSize     uint             `yaml:"read_buffer_size"`
+	WriteBufferSize    uint             `yaml:"write_buffer_size"`
+	MaxRequestBodySize uint             `yaml:"max_request_body_size"`
+	MaxConnsPerIP      uint             `yaml:"max_conns_per_ip"`
+	SetHeaders         ConfigSetHeaders `yaml:"set_headers"`
 }
 
 type ConfigBackend struct {

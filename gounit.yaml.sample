@@ -1,6 +1,10 @@
 frontends:
  - listen: 'tcp:0.0.0.0:8085'
    concurrency: 600
+   max_conns_per_ip: 100
+   read_buffer_size: 65536
+   write_buffer_size: 65536
+   max_request_body_size: 8388608
    set_headers:
     - name: 'X-Real-Ip'
       value: '${HEADER:X-Forwarded-For}'

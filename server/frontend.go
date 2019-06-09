@@ -15,13 +15,17 @@ var (
 )
 
 type Frontend struct {
-	Server        *Server
-	ListenFamily  string
-	ListenAddress string
-	HTTP          *fasthttp.Server
-	Concurrency   int
-	IsControl     bool
-	SetHeadersMap map[string]string
+	Server             *Server
+	ListenFamily       string
+	ListenAddress      string
+	HTTP               *fasthttp.Server
+	Concurrency        int
+	IsControl          bool
+	ReadBufferSize     uint
+	WriteBufferSize    uint
+	SetHeadersMap      map[string]string
+	MaxRequestBodySize uint
+	MaxConnsPerIP      uint
 }
 
 func newFrontend(srv *Server, cfg ConfigFrontend) (*Frontend, error) {
@@ -33,12 +37,15 @@ func newFrontend(srv *Server, cfg ConfigFrontend) (*Frontend, error) {
 		return nil, ErrInvalidListenAddress
 	}
 	f := &Frontend{
-		Server:        srv,
-		ListenFamily:  words[0],
-		ListenAddress: words[1],
-		Concurrency:   cfg.Concurrency,
-		IsControl:     cfg.IsControl,
-		SetHeadersMap: cfg.SetHeaders.ToMap(),
+		Server:             srv,
+		ListenFamily:       words[0],
+		ListenAddress:      words[1],
+		Concurrency:        cfg.Concurrency,
+		IsControl:          cfg.IsControl,
+		SetHeadersMap:      cfg.SetHeaders.ToMap(),
+		ReadBufferSize:     cfg.ReadBufferSize,
+		WriteBufferSize:    cfg.WriteBufferSize,
+		MaxRequestBodySize: cfg.MaxRequestBodySize,
 	}
 	return f, nil
 }
@@ -60,16 +67,16 @@ func (f *Frontend) Start() error {
 		Name:                          "",
 		Concurrency:                   f.Concurrency,
 		DisableKeepalive:              false,
-		ReadBufferSize:                0,
-		WriteBufferSize:               0,
+		ReadBufferSize:                int(f.ReadBufferSize),
+		WriteBufferSize:               int(f.WriteBufferSize),
 		ReadTimeout:                   0,
 		WriteTimeout:                  0,
-		MaxConnsPerIP:                 0,
+		MaxConnsPerIP:                 int(f.MaxConnsPerIP),
 		MaxRequestsPerConn:            0,
 		MaxKeepaliveDuration:          0,
 		TCPKeepalive:                  true,
 		TCPKeepalivePeriod:            60,
-		MaxRequestBodySize:            0,
+		MaxRequestBodySize:            int(f.MaxRequestBodySize),
 		ReduceMemoryUsage:             false,
 		GetOnly:                       false,
 		LogAllErrors:                  false,

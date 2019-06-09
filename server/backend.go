@@ -1,13 +1,13 @@
 package server
 
 import (
-	"github.com/labstack/gommon/log"
-	"github.com/trafficstars/fasthttp"
-	"github.com/trafficstars/fasthttpsocket"
-	"github.com/trafficstars/metrics"
 	"net/http"
 	"os"
 	"regexp"
+
+	"github.com/labstack/gommon/log"
+	"github.com/trafficstars/fasthttp"
+	"github.com/trafficstars/fasthttpsocket"
 )
 
 type Backend struct {
@@ -77,11 +77,6 @@ func (b *Backend) HandleRequest(f *Frontend, ctx *fasthttp.RequestCtx) error {
 		}
 		err = b.Socket.SendAndReceive(ctx)
 		if err != nil {
-			tags := metrics.NewFastTags().
-				Set("backend", b.Address).
-				Set("error", err.Error())
-			metrics.Count(`backend_error`, tags).Increment()
-			tags.Release()
 			ctx.SetStatusCode(http.StatusBadGateway)
 			if b.Server.ErrorLogger != nil {
 				b.Server.ErrorLogger.Printf("cannot send request to %v: %v", b.Address, err)
