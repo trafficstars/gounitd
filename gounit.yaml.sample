@@ -12,10 +12,10 @@ frontends:
    concurrency: 2
    is_control: true
 backends:
- - address: 'raw:native:unixpacket:/run/rotator.sock'
+ - address: 'raw:native:unixgram:/run/rotator.sock'
    connections: 500
    url_regexp: '^https?://rotator\.(localhost|tsyndicate.com|run(ative)?-syndicate.com)(:[0-9]*)?/'
- - address: 'raw:native:unixpacket:/run/pixel.sock'
+ - address: 'raw:native:unixgram:/run/pixel.sock'
    connections: 100
    url_regexp: '^https?://pixel\.(localhost|tsyndicate.com|run(ative)?-syndicate.com)(:[0-9]*)?/'
  - url_regexp: '^https?://health-check/'
